@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 
 // URL of the webpage you want to scrape
 const url = "https://beta.boomerang.trade/opp";
+// const url = "https://rainbowdarkness.com";
 
 // Function to fetch and scrape the webpage
 async function scrapeWebpage() {
