@@ -11,7 +11,7 @@ async function scrapeWebpage() {
     const response = await axios.get(url);
 
     // Load the HTML content into Cheerio
-    const $ = cheerio.load(response.data);
+    const $ = cheerio.load(response.data); 
 
     // Example: Extracting values from elements with a class of 'percentage'
     const percentageValues = [];
