@@ -1,40 +1,78 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const https = require('https');
+const puppeteer = require('puppeteer');
 
-// URL of the webpage you want to scrape
 const url = "https://beta.boomerang.trade/opp";
-// const url = "https://rainbowdarkness.com";
 
-const agent = new https.Agent({
-    rejectUnauthorized: false,
-  });
+let counter = 0;
 
-// Function to fetch and scrape the webpage
-async function scrapeWebpage() {
-  try {
-    // Make a GET request to the webpage
-    const response = await axios.get(url, { httpsAgent: agent });
+async function getText(startTime) {
 
-    // Load the HTML content into Cheerio
-    const $ = cheerio.load(response.data); 
+    if (counter === 0) {
+        console.log("Entered beta.boomerang.trade/opp")
+    } else {
+        console.log()
+        console.log("Refreshed page")
+    }
 
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    // page.setUserAgent
 
-    // $(
-    //     "#div1"
-    // ).each((i, e) => {
-    //     console.log(e + "test")
-    // })
+    await page.goto(url);
+    await page.waitForSelector('#div1 > div > div');
 
-    console.log($("#root > div > div.bg-\\[\\#0e1424\\].font-bricolagegrotesques > nav > div.w-\\[70\\%\\].lg\\:text-\\[12\\.5px\\].\\32 xl\\:text-\\[15\\.5px\\].flex.items-center"))
-    // console.log($("#div1 > div > div:nth-child(1) > div"))
+    const texts = await page.$$eval('#div1 > div > div p', paragraphs => {
+        return paragraphs.map(p => p.innerText);
+    });
 
-    // "#div1 > div > div:nth-child(1) > div > div.border.border-gray-700.py-1.rounded-b-3xl.flex.items-center.justify-center"
-    // document.querySelector("#div1 > div > div:nth-child(1) > div > div.border.border-gray-700.py-1.rounded-b-3xl.flex.items-center.justify-center > p"
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
+    const groupedTexts = [];
+    const profitableGroups = [];
+
+    // parses profit text
+    for (let i = 2; i < texts.length; i += 3) {
+        texts[i] = parseFloat(texts[i].match(/\d+\.\d+/)[0]);
+    }
+
+    // groups
+    for (let i = 0; i < texts.length; i += 3) {
+        groupedTexts.push({
+            Buy: texts[i],
+            Sell: texts[i + 1],
+            Profit: texts[i + 2]
+        });
+    }
+
+    for (let i =0; i<groupedTexts.length; i++) {
+        if (groupedTexts[i].Profit > 1) {
+            profitableGroups.push(groupedTexts[i])
+        }
+        // console.log(groupedTexts[i].Profit)
+    }
+
+    console.log(groupedTexts);
+
+    if (profitableGroups.length > 0) {
+        console.log(profitableGroups)
+    } else {
+        console.log("No trading pair above 1% profit...")
+    }
+    
+    const elapsedTime = Math.round((Date.now() - startTime) / 1000);
+    console.log(`Elapsed time: ${elapsedTime} seconds`);
+    counter++;
+    
+    await browser.close();
+
 }
 
-// Call the function to initiate the scraping
-scrapeWebpage();
+let startTime = Date.now();
+let nextStartTime = startTime;
+
+getText(startTime);
+
+// Refresh every 20 seconds
+setInterval(() => {
+    startTime = Date.now();
+    nextStartTime = startTime;
+
+    nextStartTime = getText(nextStartTime);
+}, 15000);
