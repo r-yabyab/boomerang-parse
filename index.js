@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 const url = "https://beta.boomerang.trade/opp";
 
 let counter = 0;
+let profitNum = 1.2;
 
 async function getText(startTime) {
 
@@ -42,18 +43,18 @@ async function getText(startTime) {
     }
 
     for (let i =0; i<groupedTexts.length; i++) {
-        if (groupedTexts[i].Profit > 1) {
+        if (groupedTexts[i].Profit > profitNum) {
             profitableGroups.push(groupedTexts[i])
         }
         // console.log(groupedTexts[i].Profit)
     }
 
-    console.log(groupedTexts);
+    // console.log(groupedTexts);
 
     if (profitableGroups.length > 0) {
         console.log(profitableGroups)
     } else {
-        console.log("No trading pair above 1% profit...")
+        console.log(`No trading pair above ${profitNum}% profit...`)
     }
     
     const elapsedTime = Math.round((Date.now() - startTime) / 1000);
