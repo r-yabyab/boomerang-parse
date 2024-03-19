@@ -1,9 +1,10 @@
 const puppeteer = require('puppeteer');
 
 const url = "https://beta.boomerang.trade/opp";
+const browserWS = "ws://127.0.0.1:9222/devtools/browser/62dc34b0-769d-4208-8061-4b812693563d";
 
 let counter = 0;
-let profitNum = 1.2;
+let profitNum = 1;
 
 async function getText() {
     // Define the function to perform all operations
@@ -14,7 +15,6 @@ async function getText() {
             console.log("Refreshed page");
         }
 
-        await page.reload();
         await page.waitForSelector('#div1 > div > div');
 
         const texts = await page.$$eval('#div1 > div > div p', paragraphs => {
@@ -41,6 +41,9 @@ async function getText() {
         for (let i =0; i<groupedTexts.length; i++) {
             if (groupedTexts[i].Profit > profitNum) {
                 profitableGroups.push(groupedTexts[i]);
+                // if (groupedTexts[i].Buy = 'WMATIC') {
+                //     profitableGroups.push(groupedTexts[i])
+                // }
             }
         }
 
@@ -52,15 +55,17 @@ async function getText() {
     };
 
     // Start the operations
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.connect({ browserWSEndpoint: browserWS })
     const page = await browser.newPage();
+    await page.goto(url);
     
     await performOperations(page);
 
     // Set interval to refresh the page and perform operations
     setInterval(async () => {
         await performOperations(page);
-    }, 15000);
+        await page.reload();
+    }, 3000);
 }
 
 getText();

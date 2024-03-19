@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const url = "https://beta.boomerang.trade/opp";
 
 let counter = 0;
-let profitNum = 1.2;
+let profitNum = 1;
 
 async function getText(startTime) {
 
@@ -49,7 +49,7 @@ async function getText(startTime) {
         // console.log(groupedTexts[i].Profit)
     }
 
-    // console.log(groupedTexts);
+    console.log(groupedTexts);
 
     if (profitableGroups.length > 0) {
         console.log(profitableGroups)
@@ -76,4 +76,4 @@ setInterval(() => {
     nextStartTime = startTime;
 
     nextStartTime = getText(nextStartTime);
-}, 15000);
+}, 12000);
